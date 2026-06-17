@@ -146,7 +146,7 @@ Ensure you have Python 3.11 installed.
 ```bash
 # Clone the repository
 git clone <your-repo-url>
-cd agent-payment-safety-skill
+cd pharos-riskgate
 
 # Install dependencies
 pip install -r requirements.txt
