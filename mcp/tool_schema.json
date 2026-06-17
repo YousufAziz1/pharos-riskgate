@@ -1,0 +1,87 @@
+{
+  "name": "payment_safety_gate",
+  "description": "Security verification tool that AI Agents call before executing on-chain payments.",
+  "input_schema": {
+    "type": "object",
+    "properties": {
+      "address": {
+        "type": "string",
+        "description": "The destination EVM wallet or contract address to evaluate (e.g. 0x...)."
+      },
+      "chain": {
+        "type": "string",
+        "description": "The target blockchain (e.g., pharos-testnet).",
+        "default": "pharos-testnet"
+      },
+      "intended_amount": {
+        "type": "string",
+        "description": "Optional intended payment amount in PHRS gas tokens."
+      }
+    },
+    "required": ["address"]
+  },
+  "output_schema": {
+    "type": "object",
+    "properties": {
+      "address": {
+        "type": "string"
+      },
+      "verdict": {
+        "type": "string",
+        "enum": ["ALLOW", "FLAG", "BLOCK"]
+      },
+      "risk_score": {
+        "type": "integer"
+      },
+      "confidence": {
+        "type": "integer"
+      },
+      "reason": {
+        "type": "string"
+      },
+      "agent_reputation": {
+        "type": "integer"
+      },
+      "wallet_analysis": {
+        "type": "object",
+        "properties": {
+          "wallet_age_days": { "type": "integer" },
+          "native_balance": { "type": "string" },
+          "transaction_count": { "type": "integer" },
+          "recent_transactions": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "hash": { "type": "string" },
+                "from": { "type": "string" },
+                "to": { "type": "string" },
+                "value": { "type": "string" },
+                "timestamp": { "type": "string" }
+              }
+            }
+          }
+        }
+      },
+      "risk_factors": {
+        "type": "object",
+        "properties": {
+          "goplus_flag": { "type": "boolean" },
+          "blacklisted": { "type": "boolean" },
+          "high_velocity": { "type": "boolean" },
+          "flagged_contract_interaction": { "type": "boolean" }
+        }
+      },
+      "gas_analysis": {
+        "type": "object",
+        "properties": {
+          "gas_price_gwei": { "type": "string" },
+          "estimated_cost_native": { "type": "string" }
+        }
+      },
+      "recommended_action": {
+        "type": "string"
+      }
+    }
+  }
+}

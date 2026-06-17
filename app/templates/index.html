@@ -1,0 +1,793 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pharos RiskGate – Agent Payment Safety Skill Playground</title>
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600&family=Outfit:wght@400;500;600;700&display=swap" rel="stylesheet">
+    
+    <style>
+        :root {
+            /* Design Tokens */
+            --bg-base:       #0a0a0f;
+            --bg-surface:    #111118;
+            --bg-elevated:   #16161f;
+            --border-subtle: #1e1e2e;
+            --border-active: #6c63ff66;
+            --accent:        #6c63ff;
+            --accent-glow:   #6c63ff25;
+            --text-primary:  #e8e8f0;
+            --text-muted:    #6b6b80;
+            --success:       #4ade80;
+            --warning:       #facc15;
+            --error:         #f87171;
+            --font-display:  'Outfit', sans-serif;
+            --font-mono:     'JetBrains Mono', monospace;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            background-color: var(--bg-base);
+            color: var(--text-primary);
+            font-family: var(--font-display);
+            line-height: 1.5;
+            min-height: 100vh;
+            padding: 2rem 1rem;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        header {
+            text-align: center;
+            margin-bottom: 3rem;
+        }
+
+        .logo-tag {
+            font-family: var(--font-mono);
+            color: var(--accent);
+            font-size: 0.875rem;
+            text-transform: uppercase;
+            letter-spacing: 0.2em;
+            margin-bottom: 0.5rem;
+            display: inline-block;
+        }
+
+        h1 {
+            font-size: 2.5rem;
+            font-weight: 700;
+            margin-bottom: 0.5rem;
+            letter-spacing: -0.02em;
+        }
+
+        .subtitle {
+            color: var(--text-muted);
+            font-size: 1.1rem;
+            max-width: 600px;
+            margin: 0 auto;
+        }
+
+        /* Network Status bar */
+        .network-bar {
+            background-color: var(--bg-surface);
+            border: 1px solid var(--border-subtle);
+            border-radius: 12px;
+            padding: 0.75rem 1.5rem;
+            display: flex;
+            justify-content: space-around;
+            flex-wrap: wrap;
+            gap: 1rem;
+            margin-bottom: 2rem;
+            font-family: var(--font-mono);
+            font-size: 0.85rem;
+        }
+
+        .network-item {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .network-dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background-color: var(--success);
+            box-shadow: 0 0 8px var(--success);
+        }
+
+        /* Playground Layout */
+        .grid-layout {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 2rem;
+        }
+
+        @media (min-width: 900px) {
+            .grid-layout {
+                grid-template-columns: 450px 1fr;
+            }
+        }
+
+        /* Card styles */
+        .card {
+            background-color: var(--bg-surface);
+            border: 1px solid var(--border-subtle);
+            border-radius: 16px;
+            padding: 2rem;
+            height: fit-content;
+        }
+
+        .card-title {
+            font-size: 1.25rem;
+            font-weight: 600;
+            margin-bottom: 1.5rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            border-bottom: 1px solid var(--border-subtle);
+            padding-bottom: 0.75rem;
+        }
+
+        /* Form Controls */
+        .form-group {
+            margin-bottom: 1.5rem;
+        }
+
+        label {
+            display: block;
+            font-size: 0.875rem;
+            font-weight: 500;
+            color: var(--text-muted);
+            margin-bottom: 0.5rem;
+        }
+
+        input, select {
+            width: 100%;
+            background-color: var(--bg-base);
+            border: 1px solid var(--border-subtle);
+            color: var(--text-primary);
+            border-radius: 8px;
+            padding: 0.75rem 1rem;
+            font-size: 0.95rem;
+            font-family: var(--font-mono);
+            transition: all 0.2s ease;
+        }
+
+        input:focus, select:focus {
+            outline: none;
+            border-color: var(--accent);
+            box-shadow: 0 0 0 3px var(--accent-glow);
+        }
+
+        .btn {
+            width: 100%;
+            background-color: var(--accent);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            padding: 1rem;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .btn:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 4px 20px var(--accent-glow);
+        }
+
+        .btn:active {
+            transform: translateY(0);
+        }
+
+        /* Results Panel */
+        .results-wrapper {
+            display: none;
+            flex-direction: column;
+            gap: 2rem;
+        }
+
+        /* Verdict Header banner */
+        .verdict-header {
+            border-radius: 16px;
+            padding: 1.5rem 2rem;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            border: 1px solid transparent;
+        }
+
+        .verdict-allow {
+            background-color: rgba(74, 222, 128, 0.08);
+            border-color: rgba(74, 222, 128, 0.2);
+        }
+        .verdict-flag {
+            background-color: rgba(250, 204, 21, 0.08);
+            border-color: rgba(250, 204, 21, 0.2);
+        }
+        .verdict-block {
+            background-color: rgba(248, 113, 113, 0.08);
+            border-color: rgba(248, 113, 113, 0.2);
+        }
+
+        .verdict-badge {
+            font-size: 1.5rem;
+            font-weight: 700;
+            letter-spacing: 0.05em;
+            text-transform: uppercase;
+        }
+
+        .allow-text { color: var(--success); }
+        .flag-text { color: var(--warning); }
+        .block-text { color: var(--error); }
+
+        .verdict-score-pill {
+            background-color: var(--bg-base);
+            padding: 0.5rem 1rem;
+            border-radius: 30px;
+            font-family: var(--font-mono);
+            font-size: 0.875rem;
+            border: 1px solid var(--border-subtle);
+        }
+
+        /* Metric Grid */
+        .metric-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1.5rem;
+        }
+
+        .metric-card {
+            background-color: var(--bg-base);
+            border: 1px solid var(--border-subtle);
+            border-radius: 12px;
+            padding: 1.25rem;
+            text-align: center;
+        }
+
+        .metric-val {
+            font-size: 1.75rem;
+            font-weight: 700;
+            margin-top: 0.25rem;
+            font-family: var(--font-mono);
+        }
+
+        .metric-label {
+            font-size: 0.75rem;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            color: var(--text-muted);
+        }
+
+        /* Risk factor checks */
+        .factors-list {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1rem;
+            margin-top: 1rem;
+        }
+
+        .factor-item {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            background-color: var(--bg-base);
+            border: 1px solid var(--border-subtle);
+            border-radius: 10px;
+            padding: 0.75rem 1rem;
+            font-size: 0.9rem;
+        }
+
+        .factor-dot {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+        }
+
+        .factor-true {
+            background-color: var(--error);
+            box-shadow: 0 0 6px var(--error);
+        }
+
+        .factor-false {
+            background-color: var(--success);
+            box-shadow: 0 0 6px var(--success);
+        }
+
+        /* Transaction List */
+        .tx-table-container {
+            overflow-x: auto;
+            margin-top: 1rem;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 0.9rem;
+        }
+
+        th, td {
+            text-align: left;
+            padding: 0.75rem 1rem;
+            border-bottom: 1px solid var(--border-subtle);
+        }
+
+        th {
+            color: var(--text-muted);
+            font-weight: 500;
+            font-size: 0.8rem;
+            text-transform: uppercase;
+        }
+
+        td {
+            font-family: var(--font-mono);
+        }
+
+        .tx-link {
+            color: var(--accent);
+            text-decoration: none;
+        }
+        .tx-link:hover {
+            text-decoration: underline;
+        }
+
+        /* Raw JSON Inspector */
+        .json-inspector {
+            margin-top: 2rem;
+        }
+
+        .json-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            cursor: pointer;
+            padding: 0.5rem 0;
+            user-select: none;
+        }
+
+        pre {
+            background-color: var(--bg-base);
+            border: 1px solid var(--border-subtle);
+            border-radius: 8px;
+            padding: 1.5rem;
+            overflow-x: auto;
+            font-family: var(--font-mono);
+            font-size: 0.85rem;
+            color: #b5ceda;
+            max-height: 400px;
+        }
+
+        /* Details list */
+        .details-list {
+            display: flex;
+            flex-direction: column;
+            gap: 0.75rem;
+        }
+
+        .details-row {
+            display: flex;
+            justify-content: space-between;
+            border-bottom: 1px dashed var(--border-subtle);
+            padding-bottom: 0.5rem;
+        }
+
+        .details-val {
+            font-family: var(--font-mono);
+            font-weight: 600;
+        }
+
+        /* Skeleton / Spinner loaders */
+        .spinner {
+            border: 3px solid rgba(255,255,255,0.05);
+            border-radius: 50%;
+            border-top: 3px solid var(--accent);
+            width: 20px;
+            height: 20px;
+            animation: spin 0.8s linear infinite;
+            display: none;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .info-alert {
+            background-color: var(--bg-elevated);
+            border-left: 4px solid var(--accent);
+            border-radius: 4px;
+            padding: 1rem;
+            margin-bottom: 1.5rem;
+            font-size: 0.9rem;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <span class="logo-tag">AI Agent Infrastructure</span>
+            <h1>PHAROS RISKGATE</h1>
+            <p class="subtitle">Agent Payment Safety Skill – verifying destination wallet credentials & computing real-time risk verdicts prior to payment executions.</p>
+        </header>
+
+        <!-- Network Stats -->
+        <div class="network-bar">
+            <div class="network-item">
+                <span class="network-dot"></span>
+                <span>Pharos Testnet Node Connected</span>
+            </div>
+            <div class="network-item">
+                <span class="text-muted">RPC URL:</span>
+                <span>{{ rpc_url }}</span>
+            </div>
+            <div class="network-item">
+                <span class="text-muted">Chain ID:</span>
+                <span>{{ chain_id }}</span>
+            </div>
+        </div>
+
+        <div class="grid-layout">
+            <!-- Left Panel: Input Form -->
+            <div class="card">
+                <div class="card-title">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect><path d="M7 11V7a5 5 0 0 1 10 0v4"></path></svg>
+                    Safety Gate Input
+                </div>
+
+                <div class="info-alert">
+                    This Skill evaluates recipient address security, native gas token (PHRS) metrics, and cross-chain GoPlus flags.
+                </div>
+
+                <form id="gate-form">
+                    <div class="form-group">
+                        <label for="address">Destination EVM Address</label>
+                        <input type="text" id="address" placeholder="0x..." required value="0x742d35Cc6634C0532925a3b844Bc454e4438f44e">
+                    </div>
+
+                    <div class="form-group">
+                        <label for="chain">Target Blockchain</label>
+                        <select id="chain">
+                            <option value="pharos-testnet">Pharos Testnet</option>
+                            <option value="pharos-atlantic">Pharos Atlantic Testnet</option>
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="intended_amount">Intended Payment Amount (PHRS - Optional)</label>
+                        <input type="number" id="intended_amount" step="any" placeholder="e.g. 10.5">
+                    </div>
+
+                    <button type="submit" class="btn" id="submit-btn">
+                        <span id="btn-text">Verify Transaction Safety</span>
+                        <div class="spinner" id="btn-spinner"></div>
+                    </button>
+                </form>
+            </div>
+
+            <!-- Right Panel: Dynamic Results -->
+            <div class="card" style="flex-grow: 1;">
+                <div class="card-title">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line><polyline points="10 9 9 9 8 9"></polyline></svg>
+                    Safety Report
+                </div>
+
+                <!-- Empty State -->
+                <div id="results-empty" style="text-align: center; padding: 4rem 1rem; color: var(--text-muted);">
+                    <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1" stroke-linecap="round" stroke-linejoin="round" style="margin-bottom: 1rem;"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="8" x2="12" y2="12"></line><line x1="12" y1="16" x2="12.01" y2="16"></line></svg>
+                    <p>Enter a destination wallet address and click Verify to run the transaction safety engine.</p>
+                </div>
+
+                <!-- Results Section -->
+                <div class="results-wrapper" id="results-section">
+                    <!-- Verdict Header Banner -->
+                    <div class="verdict-header" id="verdict-banner">
+                        <div>
+                            <span class="metric-label" style="display: block;">Risk Verdict</span>
+                            <span class="verdict-badge" id="verdict-badge">ALLOW</span>
+                        </div>
+                        <div class="verdict-score-pill">
+                            Risk Score: <span id="verdict-score" class="details-val">12</span>/100
+                        </div>
+                    </div>
+
+                    <!-- Recommended Action & Reason -->
+                    <div>
+                        <h4 style="margin-bottom: 0.5rem; font-size: 1rem;">Gate Decision Summary</h4>
+                        <p id="verdict-action" style="font-weight: 600; font-size: 1.05rem;" class="allow-text">Proceed with payment</p>
+                        <p id="verdict-reason" style="color: var(--text-muted); font-size: 0.9rem; margin-top: 0.25rem;">No malicious activity detected</p>
+                    </div>
+
+                    <!-- Core Metrics Grid -->
+                    <div class="metric-grid">
+                        <div class="metric-card">
+                            <div class="metric-label">Agent Reputation</div>
+                            <div class="metric-val" id="rep-val">91</div>
+                            <div style="font-size: 0.75rem; color: var(--text-muted); margin-top: 0.25rem;">Trust Score (0-100)</div>
+                        </div>
+                        <div class="metric-card">
+                            <div class="metric-label">Analysis Confidence</div>
+                            <div class="metric-val" id="conf-val">94%</div>
+                            <div style="font-size: 0.75rem; color: var(--text-muted); margin-top: 0.25rem;">Data query completeness</div>
+                        </div>
+                    </div>
+
+                    <!-- Risk Factors Checklist -->
+                    <div>
+                        <h4 style="margin-bottom: 0.5rem; font-size: 0.95rem;">Active Risk Flags</h4>
+                        <div class="factors-list">
+                            <div class="factor-item">
+                                <span class="factor-dot" id="factor-goplus"></span>
+                                <span>GoPlus Flagged</span>
+                            </div>
+                            <div class="factor-item">
+                                <span class="factor-dot" id="factor-blacklist"></span>
+                                <span>Registry Blacklisted</span>
+                            </div>
+                            <div class="factor-item">
+                                <span class="factor-dot" id="factor-velocity"></span>
+                                <span>High Tx Velocity</span>
+                            </div>
+                            <div class="factor-item">
+                                <span class="factor-dot" id="factor-contract"></span>
+                                <span>Flagged Contract Code</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Wallet Intelligence & Gas Analysis -->
+                    <div style="display: grid; grid-template-columns: 1fr; gap: 1.5rem; margin-top: 1rem;">
+                        <!-- Wallet Details -->
+                        <div>
+                            <h4 style="margin-bottom: 0.75rem; font-size: 0.95rem; border-bottom: 1px solid var(--border-subtle); padding-bottom: 0.25rem;">Wallet Intelligence</h4>
+                            <div class="details-list">
+                                <div class="details-row">
+                                    <span class="text-muted">Native Balance</span>
+                                    <span class="details-val" id="details-balance">0.00 PHRS</span>
+                                </div>
+                                <div class="details-row">
+                                    <span class="text-muted">Nonce (Tx Count)</span>
+                                    <span class="details-val" id="details-tx-count">0</span>
+                                </div>
+                                <div class="details-row">
+                                    <span class="text-muted">Estimated Activity Age</span>
+                                    <span class="details-val" id="details-age">0 days</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Gas Details -->
+                        <div>
+                            <h4 style="margin-bottom: 0.75rem; font-size: 0.95rem; border-bottom: 1px solid var(--border-subtle); padding-bottom: 0.25rem;">Gas Cost Estimation</h4>
+                            <div class="details-list">
+                                <div class="details-row">
+                                    <span class="text-muted">Gas Price (Gwei)</span>
+                                    <span class="details-val" id="details-gas-price">0.00 Gwei</span>
+                                </div>
+                                <div class="details-row">
+                                    <span class="text-muted">Estimated Cost (Native)</span>
+                                    <span class="details-val" id="details-gas-cost">0.000000 PHRS</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Recent Transactions -->
+                    <div>
+                        <h4 style="margin-bottom: 0.5rem; font-size: 0.95rem;">Recent Transactions (Last 20)</h4>
+                        <div class="tx-table-container">
+                            <table id="tx-table">
+                                <thead>
+                                    <tr>
+                                        <th>Hash</th>
+                                        <th>From</th>
+                                        <th>To</th>
+                                        <th>Value</th>
+                                        <th>Timestamp</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="tx-table-body">
+                                    <!-- Dynamic tx elements -->
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+
+                    <!-- Collapsible JSON response -->
+                    <div class="json-inspector">
+                        <div class="json-header" onclick="toggleJson()">
+                            <h4 style="font-size: 0.95rem; display: flex; align-items: center; gap: 0.25rem;">
+                                <span id="json-arrow">▶</span> Raw JSON Response Payload
+                            </h4>
+                            <button class="btn" style="width: auto; padding: 0.25rem 0.75rem; font-size: 0.8rem;" onclick="copyJson(event)">Copy JSON</button>
+                        </div>
+                        <div id="json-pre-wrapper" style="display: none; margin-top: 0.5rem;">
+                            <pre id="json-content"></pre>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const form = document.getElementById('gate-form');
+        const submitBtn = document.getElementById('submit-btn');
+        const btnText = document.getElementById('btn-text');
+        const btnSpinner = document.getElementById('btn-spinner');
+        const emptyState = document.getElementById('results-empty');
+        const resultsSection = document.getElementById('results-section');
+
+        // Form submission
+        form.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            const address = document.getElementById('address').value.trim();
+            const chain = document.getElementById('chain').value;
+            const amountInput = document.getElementById('intended_amount').value;
+            const intended_amount = amountInput ? amountInput.toString() : null;
+
+            // Loading state
+            submitBtn.disabled = true;
+            btnText.textContent = "Processing Safety Gates...";
+            btnSpinner.style.display = 'block';
+
+            try {
+                const response = await fetch('/skill/payment-safety-gate', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ address, chain, intended_amount })
+                });
+
+                if (!response.ok) {
+                    const errorData = await response.json();
+                    throw new Error(errorData.detail || 'An error occurred during evaluation.');
+                }
+
+                const data = await response.json();
+                renderResults(data);
+            } catch (err) {
+                alert(`Error: ${err.message}`);
+                console.error(err);
+            } finally {
+                submitBtn.disabled = false;
+                btnText.textContent = "Verify Transaction Safety";
+                btnSpinner.style.display = 'none';
+            }
+        });
+
+        // Toggle JSON collapsing
+        function toggleJson() {
+            const wrapper = document.getElementById('json-pre-wrapper');
+            const arrow = document.getElementById('json-arrow');
+            if (wrapper.style.display === 'none') {
+                wrapper.style.display = 'block';
+                arrow.textContent = '▼';
+            } else {
+                wrapper.style.display = 'none';
+                arrow.textContent = '▶';
+            }
+        }
+
+        // Copy raw response
+        function copyJson(e) {
+            e.stopPropagation();
+            const pre = document.getElementById('json-content');
+            navigator.clipboard.writeText(pre.textContent).then(() => {
+                alert('JSON payload copied to clipboard!');
+            });
+        }
+
+        // Render response data
+        function renderResults(data) {
+            emptyState.style.display = 'none';
+            resultsSection.style.display = 'flex';
+
+            // Verdict classes
+            const banner = document.getElementById('verdict-banner');
+            const badge = document.getElementById('verdict-badge');
+            const actionText = document.getElementById('verdict-action');
+            
+            banner.className = 'verdict-header'; // reset
+            badge.className = 'verdict-badge'; // reset
+            actionText.className = ''; // reset
+
+            if (data.verdict === 'ALLOW') {
+                banner.classList.add('verdict-allow');
+                badge.classList.add('allow-text');
+                actionText.classList.add('allow-text');
+            } else if (data.verdict === 'FLAG') {
+                banner.classList.add('verdict-flag');
+                badge.classList.add('flag-text');
+                actionText.classList.add('flag-text');
+            } else {
+                banner.classList.add('verdict-block');
+                badge.classList.add('block-text');
+                actionText.classList.add('block-text');
+            }
+
+            badge.textContent = data.verdict;
+            document.getElementById('verdict-score').textContent = data.risk_score;
+            actionText.textContent = data.recommended_action;
+            document.getElementById('verdict-reason').textContent = data.reason;
+
+            // Core Metrics
+            document.getElementById('rep-val').textContent = data.agent_reputation;
+            document.getElementById('conf-val').textContent = `${data.confidence}%`;
+
+            // Risk Factors
+            toggleFactor('factor-goplus', data.risk_factors.goplus_flag);
+            toggleFactor('factor-blacklist', data.risk_factors.blacklisted);
+            toggleFactor('factor-velocity', data.risk_factors.high_velocity);
+            toggleFactor('factor-contract', data.risk_factors.flagged_contract_interaction);
+
+            // Wallet Details
+            document.getElementById('details-balance').textContent = data.wallet_analysis.native_balance.endsWith('PHRS') ? data.wallet_analysis.native_balance : `${data.wallet_analysis.native_balance} PHRS`;
+            document.getElementById('details-tx-count').textContent = data.wallet_analysis.transaction_count;
+            document.getElementById('details-age').textContent = `${data.wallet_analysis.wallet_age_days} days`;
+
+            // Gas
+            document.getElementById('details-gas-price').textContent = `${data.gas_analysis.gas_price_gwei} Gwei`;
+            document.getElementById('details-gas-cost').textContent = data.gas_analysis.estimated_cost_native;
+
+            // Render transactions
+            const tbody = document.getElementById('tx-table-body');
+            tbody.innerHTML = '';
+            
+            const txs = data.wallet_analysis.recent_transactions;
+            if (txs.length === 0) {
+                tbody.innerHTML = `<tr><td colspan="5" style="text-align: center; color: var(--text-muted);">No transactions found for this address.</td></tr>`;
+            } else {
+                txs.forEach(tx => {
+                    const row = document.createElement('tr');
+                    
+                    // Truncate hashes for layout cleanliness
+                    const hashShort = tx.hash.substring(0, 10) + '...';
+                    const fromShort = tx.from ? tx.from.substring(0, 8) + '...' + tx.from.substring(tx.from.length-6) : 'N/A';
+                    const toShort = tx.to ? tx.to.substring(0, 8) + '...' + tx.to.substring(tx.to.length-6) : 'N/A';
+
+                    row.innerHTML = `
+                        <td><a href="{{ explorer_url }}/tx/${tx.hash}" target="_blank" class="tx-link" title="${tx.hash}">${hashShort}</a></td>
+                        <td title="${tx.from}">${fromShort}</td>
+                        <td title="${tx.to}">${toShort}</td>
+                        <td>${tx.value}</td>
+                        <td style="font-size: 0.8rem;">${tx.timestamp ? new Date(tx.timestamp).toLocaleString() : 'N/A'}</td>
+                    `;
+                    tbody.appendChild(row);
+                });
+            }
+
+            // Raw JSON
+            document.getElementById('json-content').textContent = JSON.stringify(data, null, 2);
+        }
+
+        // Toggle factor dot color classes
+        function toggleFactor(elementId, isActive) {
+            const dot = document.getElementById(elementId);
+            dot.className = 'factor-dot';
+            if (isActive) {
+                dot.classList.add('factor-true');
+            } else {
+                dot.classList.add('factor-false');
+            }
+        }
+    </script>
+</body>
+</html>
