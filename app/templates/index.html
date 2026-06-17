@@ -421,6 +421,9 @@
 <body>
     <div class="container">
         <header>
+            <div style="display: flex; justify-content: center; margin-bottom: 1.5rem;">
+                <img src="/static/logo1.png" alt="Pharos RiskGate Shield Logo" style="width: 140px; height: auto; filter: drop-shadow(0 0 25px rgba(108, 99, 255, 0.45));">
+            </div>
             <span class="logo-tag">AI Agent Infrastructure</span>
             <h1>PHAROS RISKGATE</h1>
             <p class="subtitle">Agent Payment Safety Skill – verifying destination wallet credentials & computing real-time risk verdicts prior to payment executions.</p>
@@ -634,19 +637,19 @@
     <script>
         // Fallbacks for Vercel Static Hosting (where Jinja2 template variables are not compiled)
         let rpcUrl = document.getElementById('display-rpc').textContent.trim();
-        if (rpcUrl.includes('{{') || rpcUrl.includes('rpc_url')) {
+        if (rpcUrl.includes('{' + '{') || rpcUrl.includes('rpc_url')) {
             rpcUrl = "https://testnet.dplabs-internal.com";
             document.getElementById('display-rpc').textContent = rpcUrl;
         }
 
         let chainId = document.getElementById('display-chain-id').textContent.trim();
-        if (chainId.includes('{{') || chainId.includes('chain_id')) {
+        if (chainId.includes('{' + '{') || chainId.includes('chain_id')) {
             chainId = "688688";
             document.getElementById('display-chain-id').textContent = chainId;
         }
 
         let explorerUrl = "{{ explorer_url }}";
-        if (explorerUrl.includes('{{') || explorerUrl.includes('explorer_url')) {
+        if (explorerUrl.includes('{' + '{') || explorerUrl.includes('explorer_url')) {
             explorerUrl = "https://pharos-testnet.socialscan.io";
         }
 

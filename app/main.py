@@ -5,6 +5,7 @@ from fastapi import FastAPI, HTTPException, Request, Depends
 from fastapi.responses import HTMLResponse
 from fastapi.templating import Jinja2Templates
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.staticfiles import StaticFiles
 from dotenv import load_dotenv
 
 # Load environment variables
@@ -40,6 +41,9 @@ app.add_middleware(
 
 # Setup templates directory
 templates = Jinja2Templates(directory=os.path.join(os.path.dirname(__file__), "templates"))
+
+# Mount static files directory
+app.mount("/static", StaticFiles(directory=os.path.join(os.path.dirname(__file__), "static")), name="static")
 
 # Initialize services
 chain_client = ChainClient()
