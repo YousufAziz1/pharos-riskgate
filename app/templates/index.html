@@ -434,11 +434,11 @@
             </div>
             <div class="network-item">
                 <span class="text-muted">RPC URL:</span>
-                <span>{{ rpc_url }}</span>
+                <span id="display-rpc">{{ rpc_url }}</span>
             </div>
             <div class="network-item">
                 <span class="text-muted">Chain ID:</span>
-                <span>{{ chain_id }}</span>
+                <span id="display-chain-id">{{ chain_id }}</span>
             </div>
         </div>
 
@@ -471,6 +471,12 @@
                     <div class="form-group">
                         <label for="intended_amount">Intended Payment Amount (PHRS - Optional)</label>
                         <input type="number" id="intended_amount" step="any" placeholder="e.g. 10.5">
+                    </div>
+
+                    <div class="form-group">
+                        <label for="backend_url">Backend API URL Override (Optional)</label>
+                        <input type="text" id="backend_url" placeholder="e.g. https://your-backend.onrender.com" value="">
+                        <span style="font-size: 0.75rem; color: var(--text-muted); display: block; margin-top: 0.25rem;">Leave blank to use current relative host server.</span>
                     </div>
 
                     <button type="submit" class="btn" id="submit-btn">
@@ -626,6 +632,24 @@
     </div>
 
     <script>
+        // Fallbacks for Vercel Static Hosting (where Jinja2 template variables are not compiled)
+        let rpcUrl = document.getElementById('display-rpc').textContent.trim();
+        if (rpcUrl.includes('{{') || rpcUrl.includes('rpc_url')) {
+            rpcUrl = "https://testnet.dplabs-internal.com";
+            document.getElementById('display-rpc').textContent = rpcUrl;
+        }
+
+        let chainId = document.getElementById('display-chain-id').textContent.trim();
+        if (chainId.includes('{{') || chainId.includes('chain_id')) {
+            chainId = "688688";
+            document.getElementById('display-chain-id').textContent = chainId;
+        }
+
+        let explorerUrl = "{{ explorer_url }}";
+        if (explorerUrl.includes('{{') || explorerUrl.includes('explorer_url')) {
+            explorerUrl = "https://pharos-testnet.socialscan.io";
+        }
+
         const form = document.getElementById('gate-form');
         const submitBtn = document.getElementById('submit-btn');
         const btnText = document.getElementById('btn-text');
@@ -641,6 +665,8 @@
             const chain = document.getElementById('chain').value;
             const amountInput = document.getElementById('intended_amount').value;
             const intended_amount = amountInput ? amountInput.toString() : null;
+            const backendOverride = document.getElementById('backend_url').value.trim();
+            const apiBase = backendOverride ? backendOverride.replace(/\/$/, '') : '';
 
             // Loading state
             submitBtn.disabled = true;
@@ -648,7 +674,7 @@
             btnSpinner.style.display = 'block';
 
             try {
-                const response = await fetch('/skill/payment-safety-gate', {
+                const response = await fetch(`${apiBase}/skill/payment-safety-gate`, {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json'
@@ -764,7 +790,7 @@
                     const toShort = tx.to ? tx.to.substring(0, 8) + '...' + tx.to.substring(tx.to.length-6) : 'N/A';
 
                     row.innerHTML = `
-                        <td><a href="{{ explorer_url }}/tx/${tx.hash}" target="_blank" class="tx-link" title="${tx.hash}">${hashShort}</a></td>
+                        <td><a href="${explorerUrl}/tx/${tx.hash}" target="_blank" class="tx-link" title="${tx.hash}">${hashShort}</a></td>
                         <td title="${tx.from}">${fromShort}</td>
                         <td title="${tx.to}">${toShort}</td>
                         <td>${tx.value}</td>
